@@ -13,9 +13,6 @@ const isHabitablePlanet = (planet) => {
     return isConfirmed && isLow && isHigh && isRadius; 
 }
 
-const promise = new Promise((resolve, reject) => {
-    
-});
 function loadPlantsData() {
     return new Promise((resolve, reject) => {
         const stream = fs.createReadStream(path.join(__dirname, '..', '..', 'data', 'kepler_data.csv'))

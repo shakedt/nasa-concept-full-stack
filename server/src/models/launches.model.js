@@ -1,38 +1,55 @@
-const launches = new Map();
+const launches = require('./launches.mongo');
+const planets = require('./planets.mongo');
 
-let latestFlightNumber = 100;
-
-const launch = {
-     flightNumber: latestFlightNumber,
-     missionName: 'Kepler Exploration X',
-     rocketName: 'Explorer IS1',
-     launchDate: new Date('December 27, 2030'),
-     target: 'Kepler-442 b',
-     customers: ['ZTM', 'NASA'],
-     upcoming: true,
-     success: true
- };
-
-launches.set(launch.flightNumber, launch);
+const DEFAULT_FLIGHT_NUMBER = 100;
 
 function existsLaunchWithId(launchId) {
-    return launches.has(launchId);
+    // return launches.has(launchId);
 }
 
-function getAllLaunches() {
-    return Array.from(launches.values());
+async function saveLaunch(launch) {
+    const planet = planets.findOnce({ 
+        keplerName: launch.target
+    });
+
+    if (!planet) {
+       throw new Error('No Matching Planet Was Found'); 
+    }
+
+    await launches.updateOne({
+        flightNumber: launch.flightNumber
+    }, launch, {
+        upsert: true
+    });
+}
+
+async function getLatestFlightNumber() {
+    const latestFlightNumber = 100;
+    const latestLaunch = await launches
+        .find()
+        .sort('-flightNumber');
+
+    if (latestLaunch) {
+        return DEFAULT_FLIGHT_NUMBER;
+    }
+    return latestLaunch.flightNumber;
+}
+
+async function getAllLaunches() {
+   return await launches
+    .find({}, { '_id': 0, '__v': 0 });
 }
 
 function addNewLaunch(launch) {
-    launches.set(
-        ++latestFlightNumber,
-        Object.assign(launch, {
-            upcoming: true,
-            success: true,
-            flightNumber: latestFlightNumber,
-            customers: ['Zero To Mastery', 'NASA'],
-        })
-    );
+    // launches.set(
+    //     ++latestFlightNumber,
+    //     Object.assign(launch, {
+    //         upcoming: true,
+    //         success: true,
+    //         flightNumber: latestFlightNumber,
+    //         customers: ['Zero To Mastery', 'NASA'],
+    //     })
+    // );
 }
 
 function abortLaunchById(launchId) {

@@ -8,7 +8,7 @@ function existsLaunchWithId(launchId) {
 }
 
 async function saveLaunch(launch) {
-    const planet = planets.findOne({ 
+    const planet = await planets.findOne({ 
         keplerName: launch.target
     });
 

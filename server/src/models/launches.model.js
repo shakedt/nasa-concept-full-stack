@@ -3,8 +3,10 @@ const planets = require('./planets.mongo');
 
 const DEFAULT_FLIGHT_NUMBER = 100;
 
-function existsLaunchWithId(launchId) {
-    // return launches.has(launchId);
+async function existsLaunchWithId(launchId) {
+    return await launches.findOne({
+       flightNumber: launchId 
+    });
 }
 
 async function saveLaunch(launch) {
@@ -53,14 +55,15 @@ async function scheduleNewLaunch(launch) {
     await saveLaunch(newLaunch);
 }
 
-function abortLaunchById(launchId) {
-    // big data style delete
-    const aborted = launches.get(launchId);
+async function abortLaunchById(launchId) {
+    const aborted = await launches.updateOne({
+        flightNumber: launchId
+    }, {
+        success: false,
+        upcoming: false
+    });
 
-    aborted.upcoming = false;
-    aborted.success = false;
-
-    return aborted;
+    return aborted.ok === 1 && aborted.nModified === 1;
 }
 
 module.exports = {

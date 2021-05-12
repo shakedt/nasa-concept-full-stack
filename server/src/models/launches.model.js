@@ -16,7 +16,7 @@ async function saveLaunch(launch) {
        throw new Error('No Matching Planet Was Found'); 
     }
 
-    await launches.updateOne({
+    await launches.findOneAndUpdate({
         flightNumber: launch.flightNumber
     }, launch, {
         upsert: true
@@ -24,15 +24,15 @@ async function saveLaunch(launch) {
 }
 
 async function getLatestFlightNumber() {
-    const latestFlightNumber = 100;
     const latestLaunch = await launches
         .find()
         .sort('-flightNumber');
 
-    if (latestLaunch) {
+    if (!latestLaunch) {
         return DEFAULT_FLIGHT_NUMBER;
     }
-    return latestLaunch.flightNumber;
+
+    return latestLaunch[0].flightNumber;
 }
 
 async function getAllLaunches() {
@@ -42,6 +42,7 @@ async function getAllLaunches() {
 
 async function scheduleNewLaunch(launch) {
     const newFlightNumber = await getLatestFlightNumber() + 1;
+
     const newLaunch = Object.assign(launch, {
         success: true,
         upcoming: true,

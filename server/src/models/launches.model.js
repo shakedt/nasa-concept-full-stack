@@ -8,7 +8,7 @@ function existsLaunchWithId(launchId) {
 }
 
 async function saveLaunch(launch) {
-    const planet = planets.findOnce({ 
+    const planet = planets.findOne({ 
         keplerName: launch.target
     });
 
@@ -40,16 +40,16 @@ async function getAllLaunches() {
     .find({}, { '_id': 0, '__v': 0 });
 }
 
-function addNewLaunch(launch) {
-    // launches.set(
-    //     ++latestFlightNumber,
-    //     Object.assign(launch, {
-    //         upcoming: true,
-    //         success: true,
-    //         flightNumber: latestFlightNumber,
-    //         customers: ['Zero To Mastery', 'NASA'],
-    //     })
-    // );
+async function scheduleNewLaunch(launch) {
+    const newFlightNumber = await getLatestFlightNumber() + 1;
+    const newLaunch = Object.assign(launch, {
+        success: true,
+        upcoming: true,
+        customers: ['Zero To Mastery', 'NASA'],
+        flightNumber: newFlightNumber
+    }); 
+
+    await saveLaunch(newLaunch);
 }
 
 function abortLaunchById(launchId) {
@@ -65,6 +65,6 @@ function abortLaunchById(launchId) {
 module.exports = {
     existsLaunchWithId,
     getAllLaunches,
-    addNewLaunch,
+    scheduleNewLaunch,
     abortLaunchById
 }
